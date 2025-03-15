@@ -176,6 +176,8 @@
 
       const pdf_url = getUrlJson.url;
 
+      $(".fb5-download").attr("href", pdf_url);
+
       if (pdf_url) {
         Book_v5.setConfig("pdf_type", "js");
         Book_v5.setConfig("pdfjs_source", pdf_url);
