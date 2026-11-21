@@ -22,7 +22,10 @@ npm run build      # typecheck + build em dist/
 
 ## Deploy (Coolify)
 
-- Build Pack: **Dockerfile** (na raiz). Porta **80**.
+- Build Pack: **Dockerfile** (na raiz), **não Nixpacks**. Porta **80**.
+  O Nixpacks escolhe o Node pelo snapshot do nixpkgs (veio 20.18), e o
+  projeto pede Node ≥ 22.13 (Vite 8 e PDF.js 6). Com Node velho o `npm ci`
+  falha logo, com `EBADENGINE` (`engine-strict` no `.npmrc`).
 - Variável de build: `NPM_TOKEN` (obrigatória). Opcional: `VITE_API_URL`.
 - A imagem final é só nginx com os arquivos estáticos (`nginx.conf`): gzip,
   cache de 1 ano nos arquivos com hash, `index.html` sempre revalidado.
