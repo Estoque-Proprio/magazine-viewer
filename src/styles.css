@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@fontsource-variable/nunito";
+@import "@estoque-proprio/brightmoon/styles/theme.css";
+@import "@estoque-proprio/brightmoon/styles/themes/revendi.css";
+@import "@estoque-proprio/brightmoon/styles/kit.css";
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/*
+ * page-flip: injeta um CSS fora de @layer, que ganha das classes do
+ * Tailwind 4 (`.stf__parent { position: relative }` anulava o `absolute`), e
+ * tem um erro de digitação (`.sft__wrapper`) que deixa o wrapper sem altura
+ * quando o livro não usa `autoSize`. Aqui o livro ocupa o palco inteiro e os
+ * gestos de toque ficam com a gente (a pinça abre o zoom em vez de ampliar a
+ * página do navegador).
+ */
+.viewer-book.stf__parent {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+
+.viewer-book .stf__wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
