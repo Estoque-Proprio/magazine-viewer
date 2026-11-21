@@ -8,8 +8,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run typecheck && vite build",
-    "preview": "vite preview",
+    "build": "npm run typecheck && vite build && node scripts/compress.mjs",
+    "start": "node server/index.mjs",
+    "test": "node --test server/*.test.mjs",
+    "preview": "npm run build && PORT=4173 PUBLIC_URL=http://localhost:4173 node server/index.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

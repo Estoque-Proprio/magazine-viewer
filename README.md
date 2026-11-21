@@ -15,7 +15,9 @@ página certa). `/index.html?brand=…` também funciona.
 ```
 npm install        # precisa de NPM_TOKEN (GitHub, read:packages) por causa da brightmoon
 npm run dev        # http://localhost:5173/?brand=natura&slug=<slug>
-npm run build      # typecheck + build em dist/
+npm run build      # typecheck + build em dist/ (+ .br/.gz pré-comprimidos)
+npm test           # testes do servidor
+npm run preview    # build + servidor de produção em http://localhost:4173
 ```
 
 `VITE_API_URL` troca a API (padrão: `https://site-api.revendi.app/api`). Veja `.env.example`.
@@ -27,8 +29,31 @@ npm run build      # typecheck + build em dist/
   projeto pede Node ≥ 22.13 (Vite 8 e PDF.js 6). Com Node velho o `npm ci`
   falha logo, com `EBADENGINE` (`engine-strict` no `.npmrc`).
 - Variável de build: `NPM_TOKEN` (obrigatória). Opcional: `VITE_API_URL`.
-- A imagem final é só nginx com os arquivos estáticos (`nginx.conf`): gzip,
-  cache de 1 ano nos arquivos com hash, `index.html` sempre revalidado.
+- Variáveis de execução (opcionais; os padrões são os de produção):
+  `API_URL`, `SITE_URL` (quem gera a imagem de prévia), `PUBLIC_URL`
+  (endereço do visualizador, vai no `og:url`) e `PORT` (80).
+- A imagem final é Node 22 sem dependências, sem root, com healthcheck em
+  `/healthz`. O build roda os testes do servidor: se falharem, não sobe.
+
+## Prévia do link (WhatsApp, Instagram, Facebook…)
+
+Robôs de prévia não rodam JavaScript, então o servidor (`server/app.mjs`)
+põe as meta tags Open Graph no HTML conforme `brand` e `slug`:
+
+- Título e descrição vêm de `GET /magazines/:marca/:slug` (o mesmo texto da
+  página do catálogo no site). Nunca chama o `/download`, que conta aberturas.
+- A imagem é o card 1200×630 que o site já gera
+  (`revendi.app/catalogos/:marca/:slug/opengraph-image`). A capa crua do S3
+  não serve: PNG de vários MB servido como `octet-stream`, que o WhatsApp ignora.
+- Robôs (WhatsApp, Facebook, Telegram, X…) esperam a API até 3 s. Pessoas
+  nunca esperam: se o catálogo já está no cache (10 min) a página sai com as
+  tags; senão sai na hora sem elas e o cache esquenta por trás.
+- Link sem catálogo ou catálogo que não existe: prévia genérica da Revendi.
+
+Para conferir depois do deploy: o
+[Depurador de compartilhamento da Meta](https://developers.facebook.com/tools/debug/)
+mostra a prévia e força o WhatsApp/Facebook a ler de novo um link que já
+estava em cache sem imagem.
 
 ## Como funciona
 
@@ -41,7 +66,7 @@ npm run build      # typecheck + build em dist/
 
 ### Performance
 
-Medido contra o visualizador antigo, no mesmo nginx, com um catálogo de 40 MB e 140 páginas:
+Medido contra o visualizador antigo (servido pelo mesmo nginx), com um catálogo de 40 MB e 140 páginas:
 
 | | Antigo | Novo |
 | --- | --- | --- |
